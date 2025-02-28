@@ -10,6 +10,7 @@ const interSans = Inter({
 
 export const metadata: Metadata = {
   title: "CRUD NextJS",
+  icons: "/png/icon.png",
   description: "CRUD com nextJS e tailwind",
 };
 
