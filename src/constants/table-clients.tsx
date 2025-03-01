@@ -1,5 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { MoreHorizontal } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -121,4 +131,32 @@ export const columns: ColumnDef<Payment>[] = [
   { accessorKey: "phone", header: "Telefone" },
   { accessorKey: "birth", header: "Nascimento" },
   { accessorKey: "address", header: "Endereço" },
+  {
+    id: "actions",
+    header: "Opções",
+    cell: ({ cell }) => {
+      const { push } = useRouter();
+      const clientId = cell.row.original.id;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Abrir opções</span>
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => push(`/register-customer/${clientId}`)}
+            >
+              Editar cliente
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
 ];

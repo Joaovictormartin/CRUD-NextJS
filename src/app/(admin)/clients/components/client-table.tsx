@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ModalConfirmStudentExclusion } from "./modal-confirm-student-exclusion";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,8 +34,16 @@ export function ClientTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [openModal, setOpenModal] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const handleOpenModal = () => setOpenModal(true);
+
+  const rowSelectionIndexes = Object.keys(rowSelection).map(Number);
+  const selectedClient = data.filter((_, index) =>
+    rowSelectionIndexes.includes(index),
+  );
 
   const table = useReactTable({
     data,
@@ -55,6 +64,7 @@ export function ClientTable<TData, TValue>({
     <div className="rounded-lg border border-[#27272A]/10 p-6">
       <div className="flex items-center justify-between">
         <Input
+          iconName="Search"
           className="max-w-sm"
           placeholder="Pesquise por nome ou email"
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
@@ -64,7 +74,7 @@ export function ClientTable<TData, TValue>({
         />
 
         {table.getFilteredSelectedRowModel().rows.length !== 0 && (
-          <Button variant={"destructive"}>
+          <Button variant={"destructive"} onClick={handleOpenModal}>
             Excluir Selecionados
             <Trash2 />
           </Button>
@@ -128,22 +138,35 @@ export function ClientTable<TData, TValue>({
           {table.getFilteredRowModel().rows.length} linha(s) selecionadas.
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="destructive"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="">Anterior</span>
-          </Button>
-          <Button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="">Próxima</span>
-          </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Página {table.getState().pagination.pageIndex + 1} de{" "}
+            {table.getPageCount()}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="secondary"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Próxima
+            </Button>
+          </div>
         </div>
       </div>
+
+      <ModalConfirmStudentExclusion
+        open={openModal}
+        setOpen={setOpenModal}
+        client={selectedClient}
+      />
     </div>
   );
 }
