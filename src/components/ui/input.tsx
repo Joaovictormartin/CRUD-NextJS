@@ -1,22 +1,41 @@
-import * as React from "react"
+import * as React from "react";
+import { LucideProps } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+interface InputProps extends React.ComponentProps<"input"> {
+  iconName: keyof typeof LucideIcons;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, iconName, ...props }, ref) => {
+    const IconComponent = LucideIcons[
+      iconName
+    ] as React.ComponentType<LucideProps>;
+
     return (
-      <input
-        type={type}
+      <div
         className={cn(
-          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className
+          "flex h-11 w-full items-center justify-between rounded-md border border-input px-3 py-1 shadow-sm",
+          className,
         )}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Input.displayName = "Input"
+      >
+        <input
+          ref={ref}
+          type={type}
+          className={cn(
+            "flex-1 bg-transparent text-sm transition-colors file:border-0 placeholder:text-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
+            className,
+          )}
+          {...props}
+        />
+        <IconComponent className="h-5 w-5 text-muted-foreground" />
+      </div>
+    );
+  },
+);
 
-export { Input }
+Input.displayName = "Input";
+
+export { Input };
