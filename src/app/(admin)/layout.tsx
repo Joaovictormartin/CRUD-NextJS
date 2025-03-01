@@ -1,3 +1,9 @@
+"use client";
+
+import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
+
+import { Loading } from "@/components/loading";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -6,6 +12,11 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
+  const { status } = useSession();
+
+  if (status === "unauthenticated") return redirect("/");
+  if (status === "loading") return <Loading />;
+
   return (
     <SidebarProvider>
       <AppSidebar />

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { UsersRound, Plus } from "lucide-react";
 
@@ -15,8 +16,8 @@ import {
   SidebarGroupContent,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { NavUser } from "./nav-user";
 import { cn } from "@/lib/utils";
+import { NavUser } from "./nav-user";
 
 const items = [
   { icon: UsersRound, url: "/clients", title: "Clientes" },
@@ -24,6 +25,7 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { data } = useSession();
   const pathname = usePathname();
 
   return (
@@ -66,13 +68,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: "Joao Victor",
-            email: "devjoaovictor10@gmail.com",
-            avatar: "https://github.com/Joaovictormartin.png",
-          }}
-        />
+        <NavUser user={data?.user} />
       </SidebarFooter>
     </Sidebar>
   );

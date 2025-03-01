@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 import {
   Card,
@@ -9,12 +10,18 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import { Loading } from "@/components/loading";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const { push } = useRouter();
+  const { status } = useSession();
 
-  const handleLogin = () => push("/clients");
+  const handleLogin = async () => {
+    await signIn("google").then((resp) => console.log(resp));
+  };
+
+  if (status === "authenticated") return redirect("/clients");
+  if (status === "loading") return <Loading />;
 
   return (
     <div className="mx-auto flex h-screen w-full items-center justify-center">

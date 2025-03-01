@@ -3,6 +3,8 @@ import "../styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { AuthProvider } from "@/providers/auth";
+
 const interSans = Inter({
   variable: "--font-inter-sans",
   subsets: ["latin"],
@@ -21,7 +23,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en">
-      <body className={`${interSans.variable} antialiased`}>{children}</body>
+      <body className={`${interSans.variable} antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
