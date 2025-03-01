@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { UsersRound, Plus } from "lucide-react";
 
 import {
   Sidebar,
@@ -18,11 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { NavUser } from "./nav-user";
-
-const items = [
-  { icon: UsersRound, url: "/clients", title: "Clientes" },
-  { icon: Plus, url: "/register-customer", title: "Cadastrar Cliente" },
-];
+import { menuOptions } from "@/constants/menu-options";
 
 export function AppSidebar() {
   const { data } = useSession();
@@ -44,20 +39,18 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {menuOptions.map(({ title, url, icon: Icon }) => (
+                <SidebarMenuItem key={title}>
                   <SidebarMenuButton asChild>
                     <a
-                      href={item.url}
+                      href={url}
                       className={cn(
-                        item?.url.split("/")[1] === pathname.split("/")[1] &&
+                        url.split("/")[1] === pathname.split("/")[1] &&
                           "bg-[#0a6d01]/15 hover:bg-[#0a6d01]/15",
                       )}
                     >
-                      <item.icon className="h-6 w-6 stroke-[#107E0B]" />
-                      <span className="text-base font-medium">
-                        {item.title}
-                      </span>
+                      <Icon size={20} className="stroke-[#107E0B]" />
+                      <span className="text-base font-medium">{title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -68,7 +61,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={data?.user} />
+        {data?.user && <NavUser user={data?.user} />}
       </SidebarFooter>
     </Sidebar>
   );

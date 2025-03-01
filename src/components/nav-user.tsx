@@ -21,10 +21,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavUserProps {
-  user: {
-    name?: string | undefined;
-    email?: string | undefined;
-    image?: string | undefined;
+  user?: {
+    name: string;
+    email: string;
+    image: string;
   };
 }
 
