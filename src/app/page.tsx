@@ -12,9 +12,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const route = useRouter();
+  const { push } = useRouter();
 
-  const handleLogin = () => route.push("/clients");
+  const handleLogin = () => push("/clients");
 
   return (
     <div className="mx-auto flex h-screen w-full items-center justify-center">
