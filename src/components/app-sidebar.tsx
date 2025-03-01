@@ -48,7 +48,7 @@ export function AppSidebar() {
                     <a
                       href={item.url}
                       className={cn(
-                        item?.url === pathname &&
+                        item?.url.split("/")[1] === pathname.split("/")[1] &&
                           "bg-[#0a6d01]/15 hover:bg-[#0a6d01]/15",
                       )}
                     >
