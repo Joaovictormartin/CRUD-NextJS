@@ -21,10 +21,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { createClient } from "@/actions/createClient";
 
 interface FormCustomerProps {}
 
@@ -32,14 +32,15 @@ export const formSchema = z.object({
   name: z.string().min(3, "Digite seu nome completo"),
   email: z.string().email("Digite um e-mail válido"),
   phone: z.string().min(10, "Digite um telefone válido"),
-  birthDate: z.date().refine(
-    (date) => {
-      const [day, month, year] = date.toString().split("-");
-      const isoDate = `${year}-${month}-${day}`;
-      return !isNaN(Date.parse(isoDate));
-    },
-    { message: "Digite uma data de nascimento válida" },
-  ),
+  birthDate: z.date(),
+  // .refine(
+  //   (date) => {
+  //     const [day, month, year] = date.toString().split("-");
+  //     const isoDate = `${year}-${month}-${day}`;
+  //     return !isNaN(Date.parse(isoDate));
+  //   },
+  //   { message: "Digite uma data de nascimento válida" },
+  // ),
   address: z.object({
     complement: z.string().optional(),
     zipCode: z.string().min(8, "CEP inválido").optional(),
@@ -60,7 +61,7 @@ export function FormCustomer({}: FormCustomerProps) {
       name: "joao",
       email: "joao@gmail.com",
       phone: "24998413564",
-      birthDate: new Date("1999-01-01"),
+      birthDate: new Date(),
       address: {
         city: "Barra Mansa",
         state: "RJ",

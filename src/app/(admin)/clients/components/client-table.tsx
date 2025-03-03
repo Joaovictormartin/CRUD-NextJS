@@ -23,19 +23,26 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ClientWithAddress } from "@/@types/client-with-address";
 import { ModalConfirmStudentExclusion } from "./modal-confirm-student-exclusion";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps<_, TValue> {
+  data: ClientWithAddress[];
+  search: string;
+  setSearch: (search: string) => void;
+  columns: ColumnDef<ClientWithAddress, TValue>[];
+  handleDelete: (clientIds: string[]) => void;
 }
 
 export function ClientTable<TData, TValue>({
-  columns,
   data,
+  search,
+  columns,
+  setSearch,
+  handleDelete,
 }: DataTableProps<TData, TValue>) {
-  const [openModal, setOpenModal] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const handleOpenModal = () => setOpenModal(true);
@@ -60,17 +67,17 @@ export function ClientTable<TData, TValue>({
     },
   });
 
+  console.log(selectedClient);
+
   return (
     <div className="rounded-lg border border-[#27272A]/10 p-6">
       <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
         <Input
+          value={search}
           iconName="Search"
           className="w-full sm:w-[358px]"
           placeholder="Pesquise por nome ou email"
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={({ target }) =>
-            table.getColumn("email")?.setFilterValue(target.value)
-          }
+          onChange={({ target }) => setSearch(target.value)}
         />
 
         {table.getFilteredSelectedRowModel().rows.length !== 0 && (
@@ -170,6 +177,7 @@ export function ClientTable<TData, TValue>({
         open={openModal}
         setOpen={setOpenModal}
         client={selectedClient}
+        handleDelete={handleDelete}
       />
     </div>
   );

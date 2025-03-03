@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
+import { Client } from "@prisma/client";
 
 import {
   Dialog,
@@ -14,18 +15,23 @@ import { Button } from "@/components/ui/button";
 
 interface ModalConfirmStudentExclusionProps {
   open: boolean;
-  client: any;
+  client: Client[];
   setOpen: (open: boolean) => void;
+  handleDelete: (clientIds: string[]) => void;
 }
 
 export function ModalConfirmStudentExclusion({
   open,
   client,
   setOpen,
+  handleDelete,
 }: ModalConfirmStudentExclusionProps) {
-  const names = client?.map((item: any) => item.name)?.join(", ");
+  const names = client?.map((item) => item.name)?.join(", ");
 
-  const handleDeleteClient = () => {};
+  const handleDeleteClients = (client: Client[]) => {
+    const clientIds = client?.map((item) => item.id);
+    handleDelete(clientIds);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -47,7 +53,10 @@ export function ModalConfirmStudentExclusion({
         <DialogFooter className="flex justify-end gap-2">
           <Button onClick={() => setOpen(false)}>Cancelar</Button>
 
-          <Button variant={"destructive"} onClick={handleDeleteClient}>
+          <Button
+            variant={"destructive"}
+            onClick={() => handleDeleteClients(client)}
+          >
             <Trash2 />
             Deletar
           </Button>
