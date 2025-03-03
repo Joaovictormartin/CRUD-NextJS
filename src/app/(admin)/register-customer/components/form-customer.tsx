@@ -1,6 +1,7 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -23,15 +24,31 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { createClient } from "@/actions/createClient";
 
 interface FormCustomerProps {}
 
-const formSchema = z.object({
-  phone: z.string().min(2),
-  email: z.string().email(),
-  name: z.string().min(2).max(50),
-  address: z.string().min(2).max(100),
-  birth: z.date({ required_error: "A data de nascimento é obrigatória." }),
+export const formSchema = z.object({
+  name: z.string().min(3, "Digite seu nome completo"),
+  email: z.string().email("Digite um e-mail válido"),
+  phone: z.string().min(10, "Digite um telefone válido"),
+  birthDate: z.date().refine(
+    (date) => {
+      const [day, month, year] = date.toString().split("-");
+      const isoDate = `${year}-${month}-${day}`;
+      return !isNaN(Date.parse(isoDate));
+    },
+    { message: "Digite uma data de nascimento válida" },
+  ),
+  address: z.object({
+    complement: z.string().optional(),
+    zipCode: z.string().min(8, "CEP inválido").optional(),
+    state: z.string().length(2, "UF inválida").optional(),
+    street: z.string().min(3, "Rua obrigatória").optional(),
+    city: z.string().min(3, "Cidade obrigatória").optional(),
+    number: z.string().min(1, "Número obrigatório").optional(),
+    neighborhood: z.string().min(3, "Bairro obrigatório").optional(),
+  }),
 });
 
 export function FormCustomer({}: FormCustomerProps) {
@@ -40,19 +57,31 @@ export function FormCustomer({}: FormCustomerProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      // birth: "",
+      name: "joao",
+      email: "joao@gmail.com",
+      phone: "24998413564",
+      birthDate: new Date("1999-01-01"),
+      address: {
+        city: "Barra Mansa",
+        state: "RJ",
+        street: "rua 2",
+        number: "1",
+        zipCode: "273257501",
+        complement: "134",
+        neighborhood: "adsff",
+      },
     },
   });
 
   const handleNavigateClients = () => push("/clients");
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    console.log(data);
+    await createClient(data);
+    toast.success("Cliente cadastrado com sucesso!");
+
+    push(`/clients`);
+  };
 
   return (
     <div className="rounded-lg border border-[#27272A]/10 p-6">
@@ -115,7 +144,7 @@ export function FormCustomer({}: FormCustomerProps) {
             />
 
             <FormField
-              name="birth"
+              name="birthDate"
               control={form.control}
               render={({ field }) => (
                 <Popover>
@@ -153,8 +182,58 @@ export function FormCustomer({}: FormCustomerProps) {
             />
           </div>
 
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <FormField
+              name="address.zipCode"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input iconName="Pin" placeholder="CEP *" {...field} />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="address.number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      iconName="FileDigit"
+                      placeholder="Número *"
+                      {...field}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="address.complement"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      iconName="House"
+                      placeholder="Complemento *"
+                      {...field}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
-            name="address"
+            name="address.street"
             control={form.control}
             render={({ field }) => (
               <FormItem>

@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
       <AppSidebar />
       <main className="h-screen w-full">
         <SidebarTrigger />
-        <div className="mx-auto max-w-[1200px] p-8 pt-4">{children}</div>
+        <div className="mx-auto max-w-[1200px] p-4 pt-4 sm:p-8">{children}</div>
       </main>
     </SidebarProvider>
   );

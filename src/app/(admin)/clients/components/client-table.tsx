@@ -62,10 +62,10 @@ export function ClientTable<TData, TValue>({
 
   return (
     <div className="rounded-lg border border-[#27272A]/10 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
         <Input
           iconName="Search"
-          className="max-w-sm"
+          className="w-full sm:w-[358px]"
           placeholder="Pesquise por nome ou email"
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={({ target }) =>
@@ -74,7 +74,11 @@ export function ClientTable<TData, TValue>({
         />
 
         {table.getFilteredSelectedRowModel().rows.length !== 0 && (
-          <Button variant={"destructive"} onClick={handleOpenModal}>
+          <Button
+            variant={"destructive"}
+            onClick={handleOpenModal}
+            className="w-full sm:w-auto"
+          >
             Excluir Selecionados
             <Trash2 />
           </Button>
@@ -124,7 +128,7 @@ export function ClientTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nenhum resultado.
+                  Nenhum resultado encontrado...
                 </TableCell>
               </TableRow>
             )}
@@ -132,7 +136,7 @@ export function ClientTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} de{" "}
           {table.getFilteredRowModel().rows.length} linha(s) selecionadas.
