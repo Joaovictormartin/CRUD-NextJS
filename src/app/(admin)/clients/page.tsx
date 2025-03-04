@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from "react";
 
 import { Title } from "@/components/title";
+import { Loading } from "@/components/loading";
 import { columns } from "@/constants/table-clients";
 import { getClients, deleteClients } from "@/actions";
 import { ClientWithAddress } from "@/@types/client-with-address";
@@ -10,6 +11,7 @@ import { ClientTable } from "@/app/(admin)/clients/components/client-table";
 
 export default function Clients() {
   const [search, setSearch] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [clients, setClients] = useState<ClientWithAddress[]>([]);
 
   const getData = useCallback(async () => {
@@ -18,13 +20,24 @@ export default function Clients() {
   }, [search]);
 
   const handleDelete = async (clientIds: string[]) => {
-    await deleteClients(clientIds);
-    getData();
+    try {
+      setLoading(true);
+
+      await deleteClients(clientIds);
+      getData();
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     getData();
   }, [getData]);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div>
