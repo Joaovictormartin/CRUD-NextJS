@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 
@@ -12,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
+import useFormatPhone from "@/hooks/use-format-phone";
 import { ClientWithAddress } from "@/@types/client-with-address";
 
 export const columns: ColumnDef<ClientWithAddress>[] = [
@@ -37,18 +39,25 @@ export const columns: ColumnDef<ClientWithAddress>[] = [
   },
   { accessorKey: "name", header: "Nome" },
   { accessorKey: "email", header: "E-mail" },
-  { accessorKey: "phone", header: "Telefone" },
+  {
+    accessorKey: "phone",
+    header: "Telefone",
+    cell: ({ row }) => {
+      const { formatPhone } = useFormatPhone();
+      return formatPhone(row.original.phone);
+    },
+  },
   {
     accessorKey: "birthDate",
     header: "Nascimento",
-    cell: ({ row }) => new Date(row.original.birthDate).toLocaleDateString(),
+    cell: ({ row }) => format(new Date(row.original.birthDate), "dd/MM/yyyy"),
   },
   {
     accessorKey: "address.street",
     header: "Endereço",
     cell: ({ row }) => {
       const addressField = row.original.address;
-      const fullAddress = `${addressField?.street}, ${addressField?.number ? "nº " + addressField?.number + ", " : ""}${addressField?.complement ? addressField?.complement + ", " : ""}${addressField?.neighborhood} - ${addressField?.city}/${addressField?.state}`;
+      const fullAddress = `${addressField?.street}, ${addressField?.number ? "Nº " + addressField?.number + ", " : ""}${addressField?.complement ? addressField?.complement + ", " : ""}${addressField?.neighborhood} - ${addressField?.city}/${addressField?.state}`;
 
       return fullAddress;
     },
@@ -56,9 +65,9 @@ export const columns: ColumnDef<ClientWithAddress>[] = [
   {
     id: "actions",
     header: "Opções",
-    cell: ({ cell }) => {
+    cell: ({ row }) => {
       const { push } = useRouter();
-      const clientId = cell.row.original.id;
+      const clientId = row.original.id;
 
       return (
         <DropdownMenu>
