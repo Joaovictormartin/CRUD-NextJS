@@ -6,7 +6,8 @@ import { getServerSession } from "next-auth";
 import { db } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 
-interface CreateClientParams {
+interface UpdateClientParams {
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -22,12 +23,13 @@ interface CreateClientParams {
   };
 }
 
-export const createClient = async (params: CreateClientParams) => {
+export const updateClient = async (params: UpdateClientParams) => {
   const user = await getServerSession(authOptions);
 
   if (!user) throw new Error("Usuário não autenticado");
 
-  const clientCreated = await db.client.create({
+  await db.client.update({
+    where: { id: params.id },
     data: {
       name: params.name,
       email: params.email,
@@ -37,7 +39,8 @@ export const createClient = async (params: CreateClientParams) => {
     },
   });
 
-  await db.address.create({
-    data: { ...params.address, clientId: clientCreated.id },
+  await db.address.update({
+    where: { clientId: params.id },
+    data: { ...params.address, clientId: params.id },
   });
 };
