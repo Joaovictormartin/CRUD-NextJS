@@ -28,14 +28,15 @@ export function ModalConfirmStudentExclusion({
 }: ModalConfirmStudentExclusionProps) {
   const names = client?.map((item) => item.name)?.join(", ");
 
-  const handleDeleteClients = (client: Client[]) => {
+  const handleDeleteClients = async (client: Client[]) => {
+    setOpen(false);
     const clientIds = client?.map((item) => item.id);
-    handleDelete(clientIds);
+    await handleDelete(clientIds);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-[420px]">
+      <DialogContent className="max-w-[420px] rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-sm font-bold">
             <strong className="text-[#F87171]">CUIDADO:</strong> Você está
