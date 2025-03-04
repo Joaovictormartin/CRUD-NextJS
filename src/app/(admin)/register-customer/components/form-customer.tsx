@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar as CalendarIcon, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, Pencil, Plus } from "lucide-react";
 
 import {
   Form,
@@ -21,26 +22,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { createClient } from "@/actions";
+import useViaCep from "@/hooks/use-via-cep";
 import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/loading";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { createClient, updateClient } from "@/actions";
+import { ClientWithAddress } from "@/@types/client-with-address";
 
-interface FormCustomerProps {}
+interface FormCustomerProps {
+  client?: ClientWithAddress | null;
+}
 
 export const formSchema = z.object({
   name: z.string().min(3, "Digite seu nome completo"),
   email: z.string().email("Digite um e-mail válido"),
   phone: z.string().min(10, "Digite um telefone válido"),
   birthDate: z.date(),
-  // .refine(
-  //   (date) => {
-  //     const [day, month, year] = date.toString().split("-");
-  //     const isoDate = `${year}-${month}-${day}`;
-  //     return !isNaN(Date.parse(isoDate));
-  //   },
-  //   { message: "Digite uma data de nascimento válida" },
-  // ),
   address: z.object({
     complement: z.string().optional(),
     zipCode: z.string().min(8, "CEP inválido").optional(),
@@ -52,37 +50,80 @@ export const formSchema = z.object({
   }),
 });
 
-export function FormCustomer({}: FormCustomerProps) {
+export function FormCustomer({ client }: FormCustomerProps) {
   const { push } = useRouter();
+  const { fetchAddress } = useViaCep();
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const isEdit = !!client;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "joao",
-      email: "joao@gmail.com",
-      phone: "24998413564",
-      birthDate: new Date(),
+      name: client ? client.name : "",
+      email: client ? client.email : "",
+      phone: client ? client.phone : "",
+      birthDate: client ? new Date(client.birthDate) : new Date(),
       address: {
-        city: "Barra Mansa",
-        state: "RJ",
-        street: "rua 2",
-        number: "1",
-        zipCode: "273257501",
-        complement: "134",
-        neighborhood: "adsff",
+        city: client?.address?.city ? client.address.city : "",
+        state: client?.address?.state ? client.address.state : "",
+        street: client?.address?.street ? client.address.street : "",
+        number: client?.address?.number ? client.address.number : "",
+        zipCode: client?.address?.zipCode ? client.address.zipCode : "",
+        complement: client?.address?.complement
+          ? client.address.complement
+          : "",
+        neighborhood: client?.address?.neighborhood
+          ? client.address.neighborhood
+          : "",
       },
     },
   });
 
-  const handleNavigateClients = () => push("/clients");
+  const zipCode = form.watch("address.zipCode");
+
+  const handleGetAddress = useCallback(async () => {
+    if (zipCode && zipCode.length < 8) return;
+
+    const response = await fetchAddress(zipCode ?? "");
+
+    if (response) {
+      form.setValue("address.state", response?.uf);
+      form.setValue("address.city", response?.localidade);
+      form.setValue("address.street", response?.logradouro);
+      form.setValue("address.neighborhood", response?.bairro);
+    }
+  }, [zipCode, fetchAddress, form.setValue]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    await createClient(data);
-    toast.success("Cliente cadastrado com sucesso!");
+    try {
+      setLoading(true);
 
-    push(`/clients`);
+      if (isEdit) {
+        await updateClient({ ...data, id: client?.id });
+      } else {
+        await createClient(data);
+      }
+
+      toast.success(
+        `Cliente ${isEdit ? "atualizado" : "cadastrado"} com sucesso!`,
+      );
+      push(`/clients`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleNavigateClients = () => push("/clients");
+
+  useEffect(() => {
+    handleGetAddress();
+  }, [handleGetAddress]);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="rounded-lg border border-[#27272A]/10 p-6">
@@ -257,7 +298,8 @@ export function FormCustomer({}: FormCustomerProps) {
             </Button>
 
             <Button variant={"success"} size={"lg"} type="submit">
-              Cadastrar <Plus />
+              {isEdit ? "Editar" : "Cadastrar"}
+              {isEdit ? <Pencil /> : <Plus />}
             </Button>
           </div>
         </form>
