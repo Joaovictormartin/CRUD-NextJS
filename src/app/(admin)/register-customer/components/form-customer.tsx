@@ -1,13 +1,14 @@
 "use client";
+import "react-day-picker/dist/style.css";
 
 import { z } from "zod";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { Pencil, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar as CalendarIcon, Pencil, Plus } from "lucide-react";
 
 import {
   Form,
@@ -16,17 +17,11 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+
 import useViaCep from "@/hooks/use-via-cep";
 import { Input } from "@/components/ui/input";
 import { Loading } from "@/components/loading";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { createClient, updateClient } from "@/actions";
 import { ClientWithAddress } from "@/@types/client-with-address";
 
@@ -38,7 +33,7 @@ export const formSchema = z.object({
   name: z.string().min(3, "Digite seu nome completo"),
   email: z.string().email("Digite um e-mail válido"),
   phone: z.string().min(10, "Digite um telefone válido"),
-  birthDate: z.date(),
+  birthDate: z.string().min(10, "Digite uma data válida"),
   address: z.object({
     complement: z.string().optional(),
     zipCode: z.string().min(8, "CEP inválido").optional(),
@@ -56,15 +51,13 @@ export function FormCustomer({ client }: FormCustomerProps) {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const isEdit = !!client;
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: client ? client.name : "",
       email: client ? client.email : "",
       phone: client ? client.phone : "",
-      birthDate: client ? new Date(client.birthDate) : new Date(),
+      birthDate: client ? client.birthDate : "",
       address: {
         city: client?.address?.city ? client.address.city : "",
         state: client?.address?.state ? client.address.state : "",
@@ -81,6 +74,7 @@ export function FormCustomer({ client }: FormCustomerProps) {
     },
   });
 
+  const addressField = form.watch("address");
   const zipCode = form.watch("address.zipCode");
 
   const handleGetAddress = useCallback(async () => {
@@ -118,6 +112,12 @@ export function FormCustomer({ client }: FormCustomerProps) {
   };
 
   const handleNavigateClients = () => push("/clients");
+
+  const isEdit = !!client;
+
+  const addressFull = addressField?.street
+    ? `${addressField?.street}, ${addressField?.number ? "nº " + addressField?.number + ", " : ""}${addressField?.complement ? addressField?.complement + ", " : ""}${addressField?.neighborhood} - ${addressField?.city}/${addressField?.state}`
+    : "";
 
   useEffect(() => {
     handleGetAddress();
@@ -189,37 +189,18 @@ export function FormCustomer({ client }: FormCustomerProps) {
               name="birthDate"
               control={form.control}
               render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl className="w-full">
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "h-11 pl-3 text-left hover:bg-transparent hover:text-muted-foreground",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Data de nascimento *</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-6 w-6" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      initialFocus
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      placeholder="Data de nascimento *"
+                      className="[&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50"
+                      {...field}
                     />
-                  </PopoverContent>
-                </Popover>
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
               )}
             />
           </div>
@@ -274,22 +255,11 @@ export function FormCustomer({ client }: FormCustomerProps) {
             />
           </div>
 
-          <FormField
-            name="address.street"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    iconName="MapPin"
-                    placeholder="Endereço *"
-                    {...field}
-                  />
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            )}
+          <Input
+            disabled
+            iconName="MapPin"
+            value={addressFull}
+            placeholder="Endereço *"
           />
 
           <div className="mt-4 flex justify-end gap-2.5">
