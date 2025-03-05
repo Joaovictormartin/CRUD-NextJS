@@ -8,7 +8,6 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  ColumnFiltersState,
   getFilteredRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
@@ -30,8 +29,8 @@ interface DataTableProps<_, TValue> {
   data: ClientWithAddress[];
   search: string;
   setSearch: (search: string) => void;
-  columns: ColumnDef<ClientWithAddress, TValue>[];
   handleDelete: (clientIds: string[]) => void;
+  columns: ColumnDef<ClientWithAddress, TValue>[];
 }
 
 export function ClientTable<TData, TValue>({
@@ -43,9 +42,10 @@ export function ClientTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
-  const handleOpenModal = () => setOpenModal(true);
+  const [{ pageIndex, pageSize }, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 3,
+  });
 
   const rowSelectionIndexes = Object.keys(rowSelection).map(Number);
   const selectedClient = data.filter((_, index) =>
@@ -55,19 +55,19 @@ export function ClientTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
-      columnFilters,
       rowSelection,
+      pagination: { pageIndex, pageSize },
     },
   });
 
-  console.log(selectedClient);
+  const handleOpenModal = () => setOpenModal(true);
 
   return (
     <div className="rounded-lg border border-[#27272A]/10 p-6">
@@ -150,7 +150,7 @@ export function ClientTable<TData, TValue>({
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium text-muted-foreground">
             Página {table.getState().pagination.pageIndex + 1} de{" "}
             {table.getPageCount()}
           </div>
