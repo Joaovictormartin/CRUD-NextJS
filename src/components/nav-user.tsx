@@ -22,9 +22,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NavUserProps {
   user?: {
-    name: string;
-    email: string;
-    image: string;
+    name?: string;
+    email?: string;
+    image?: string;
   };
 }
 

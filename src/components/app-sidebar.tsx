@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -26,13 +27,15 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="mx-auto pb-10 pt-8">
-        <Image
-          alt="icon"
-          width={50}
-          height={50}
-          src={"/png/icon.png"}
-          className="rounded-full"
-        />
+        <Link href={"/clients"}>
+          <Image
+            alt="icon"
+            width={50}
+            height={50}
+            src={"/png/icon.png"}
+            className="rounded-full"
+          />
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>
@@ -61,7 +64,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        {data?.user && <NavUser user={data?.user} />}
+        <NavUser
+          user={{
+            name: data?.user?.name ?? undefined,
+            email: data?.user?.email ?? undefined,
+            image: data?.user?.image ?? undefined,
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
   );
