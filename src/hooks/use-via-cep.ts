@@ -3,10 +3,14 @@ import { useCallback } from "react";
 
 const useViaCep = () => {
   const fetchAddress = useCallback(async (cep: string) => {
-    if (!cep || cep.length !== 8) return;
+    const cepFormatted = cep.replace(/\D/g, "");
+
+    if (!cepFormatted || cepFormatted.length !== 8) return;
 
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+      const response = await axios.get(
+        `https://viacep.com.br/ws/${cepFormatted}/json/`,
+      );
 
       if (response.data) {
         return response.data;
