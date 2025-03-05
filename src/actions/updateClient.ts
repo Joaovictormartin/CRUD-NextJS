@@ -11,7 +11,7 @@ interface UpdateClientParams {
   name: string;
   email: string;
   phone: string;
-  birthDate: Date;
+  birthDate: string;
   address?: {
     city?: string;
     state?: string;
@@ -33,8 +33,8 @@ export const updateClient = async (params: UpdateClientParams) => {
     data: {
       name: params.name,
       email: params.email,
-      phone: params.phone,
       userId: (user.user as any).id,
+      phone: params.phone.replace(/\D/g, ""),
       birthDate: format(new Date(params.birthDate), "yyyy-MM-dd"),
     },
   });
