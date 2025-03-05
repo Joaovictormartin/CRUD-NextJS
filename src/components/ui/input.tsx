@@ -1,18 +1,17 @@
 import * as React from "react";
-import { LucideProps } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 interface InputProps extends React.ComponentProps<"input"> {
-  iconName: keyof typeof LucideIcons;
+  iconName?: keyof typeof LucideIcons | null;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, iconName, ...props }, ref) => {
-    const IconComponent = LucideIcons[
-      iconName
-    ] as React.ComponentType<LucideProps>;
+    const IconComponent = iconName
+      ? (LucideIcons[iconName] as React.ComponentType<LucideIcons.LucideProps>)
+      : null;
 
     return (
       <div
@@ -30,7 +29,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           {...props}
         />
-        <IconComponent className="h-5 w-5 text-muted-foreground" />
+        {IconComponent && (
+          <IconComponent className="h-5 w-5 text-muted-foreground" />
+        )}
       </div>
     );
   },
