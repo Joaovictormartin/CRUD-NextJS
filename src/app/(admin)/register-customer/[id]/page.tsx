@@ -1,6 +1,7 @@
 "use client";
 
 import { z } from "zod";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Title } from "@/components/title";
@@ -9,21 +10,20 @@ import { Loading } from "@/components/loading";
 import { FormCustomer } from "../components/form-customer";
 import { ClientWithAddress } from "@/@types/client-with-address";
 
-const RegisterCustomerSchema = z.object({
-  params: z.object({
-    id: z.string().uuid(),
-  }),
-});
+const idSchema = z.object({ id: z.string().uuid() });
 
-type RegisterCustomerProps = z.infer<typeof RegisterCustomerSchema>;
+const RegisterCustomer = () => {
+  const params = useParams();
+  const result = idSchema.safeParse(params);
 
-const RegisterCustomer = ({ params: { id } }: RegisterCustomerProps) => {
+  if (!result.success) return null;
+
   const [client, setClient] = useState<ClientWithAddress | null>(null);
 
   const getData = useCallback(async () => {
-    const clientFound = await getClientById({ clientId: id });
+    const clientFound = await getClientById({ clientId: result.data.id });
     setClient(clientFound);
-  }, [id]);
+  }, [result.data.id]);
 
   useEffect(() => {
     getData();
